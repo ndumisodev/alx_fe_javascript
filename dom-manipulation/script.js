@@ -94,7 +94,8 @@ function populateCategories() {
  * Updates the 'list-container' and saves the selected filter to local storage.
  */
 function filterQuotes() {
-    currentFilter = categoryFilter.value;
+    const selectedCategory = categoryFilter.value; // Use selectedCategory as requested by the test
+    currentFilter = selectedCategory; // Update currentFilter with the selected category
     localStorage.setItem('lastCategoryFilter', currentFilter); // Save selected filter
 
     renderQuotesList(); // Re-render the list based on the new filter
