@@ -133,9 +133,22 @@
             border-bottom: 1px solid #ecf0f1;
             color: #555;
             font-size: 0.95rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
         #list-container li:last-child {
             border-bottom: none;
+        }
+        #categoryFilter {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #bdc3c7;
+            border-radius: 8px;
+            font-size: 1rem;
+            background-color: #fdfdfd;
         }
 
         @keyframes fadeIn {
@@ -160,6 +173,14 @@
             <button id="exportQuotesButton">Export Quotes (JSON)</button>
         </div>
 
+        <!-- Category Filter -->
+        <div class="filter-group">
+            <h2>Filter Quotes by Category</h2>
+            <select id="categoryFilter">
+                <option value="all">All Categories</option>
+                <!-- Categories will be dynamically populated here -->
+            </select>
+        </div>
 
         <!-- Form for adding new quotes -->
         <div class="input-group">
