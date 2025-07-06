@@ -150,6 +150,16 @@
             font-size: 1rem;
             background-color: #fdfdfd;
         }
+        #syncStatusMessage {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            font-size: 0.9rem;
+            display: none; /* Hidden by default */
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
@@ -171,6 +181,7 @@
         <div>
             <button id="newQuote">Show New Quote</button>
             <button id="exportQuotesButton">Export Quotes (JSON)</button>
+            <button id="syncNowButton">Sync Now</button> <!-- New: Sync Now button -->
         </div>
 
         <!-- Category Filter -->
@@ -196,6 +207,9 @@
             <input type="file" id="importFile" accept=".json" />
             <button id="importQuotesButton">Import Quotes</button>
         </div>
+
+        <!-- Sync Status Message -->
+        <div id="syncStatusMessage" role="alert"></div>
 
         <h2>Added List:</h2>
         <ul id="list-container"></ul>
