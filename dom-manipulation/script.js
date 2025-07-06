@@ -23,8 +23,8 @@ const addQuoteButton = document.getElementById('addQuoteButton');
 function showRandomQuote() {
     // Check if there are any quotes to display
     if (quotes.length === 0) {
-        quoteText.textContent = "No quotes available.";
-        quoteCategory.textContent = "";
+        quoteText.innerHTML = "No quotes available."; // Changed to innerHTML
+        quoteCategory.innerHTML = ""; // Changed to innerHTML
         return;
     }
 
@@ -33,8 +33,8 @@ function showRandomQuote() {
     const randomQuote = quotes[randomIndex];
 
     // Update the DOM with the random quote
-    quoteText.textContent = `"${randomQuote.text}"`;
-    quoteCategory.textContent = `- ${randomQuote.category}`;
+    quoteText.innerHTML = `"${randomQuote.text}"`; // Changed to innerHTML
+    quoteCategory.innerHTML = `- ${randomQuote.category}`; // Changed to innerHTML
 
     // Optional: Add a fade-in animation class for visual effect
     quoteDisplay.style.animation = 'none'; // Reset animation
