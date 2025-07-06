@@ -1,11 +1,5 @@
-// Array to store quote objects
-let quotes = [
-    { text: "The only way to do great work is to love what you do.", category: "Inspiration" },
-    { text: "Innovation distinguishes between a leader and a follower.", category: "Innovation" },
-    { text: "Strive not to be a success, but rather to be of value.", category: "Wisdom" },
-    { text: "The future belongs to those who believe in the beauty of their dreams.", category: "Dreams" },
-    { text: "The mind is everything. What you think you become.", category: "Mindset" }
-];
+// Array to store quote objects. This will be populated from local storage.
+let quotes = [];
 
 // Get references to DOM elements
 const quoteDisplay = document.getElementById('quoteDisplay');
@@ -15,7 +9,104 @@ const newQuoteButton = document.getElementById('newQuote');
 const newQuoteTextInput = document.getElementById('newQuoteText');
 const newQuoteCategoryInput = document.getElementById('newQuoteCategory');
 const addQuoteButton = document.getElementById('addQuoteButton');
-const listContainer = document.getElementById('list-container'); // Get reference to the list container
+const listContainer = document.getElementById('list-container');
+const exportQuotesButton = document.getElementById('exportQuotesButton');
+const importFile = document.getElementById('importFile');
+const importQuotesButton = document.getElementById('importQuotesButton');
+
+/**
+ * Saves the current 'quotes' array to local storage.
+ * The array is converted to a JSON string before saving.
+ */
+function saveQuotes() {
+    try {
+        // This is where localStorage.setItem is used.
+        localStorage.setItem('quotes', JSON.stringify(quotes));
+        console.log('Quotes saved to local storage.');
+    } catch (e) {
+        console.error('Error saving quotes to local storage:', e);
+        alert('Error saving quotes: ' + e.message); // Inform user about storage error
+    }
+}
+
+/**
+ * Loads quotes from local storage into the 'quotes' array.
+ * If no quotes are found, it initializes with a default set.
+ */
+function loadQuotes() {
+    try {
+        const storedQuotes = localStorage.getItem('quotes');
+        if (storedQuotes) {
+            quotes = JSON.parse(storedQuotes);
+            console.log('Quotes loaded from local storage.');
+        } else {
+            // If no stored quotes, use a default set
+            quotes = [
+                { text: "The only way to do great work is to love what you do.", category: "Inspiration" },
+                { text: "Innovation distinguishes between a leader and a follower.", category: "Innovation" },
+                { text: "Strive not to be a success, but rather to be of value.", category: "Wisdom" },
+                { text: "The future belongs to those who believe in the beauty of their dreams.", category: "Dreams" },
+                { text: "The mind is everything. What you think you become.", category: "Mindset" }
+            ];
+            saveQuotes(); // Save the default quotes to local storage
+        }
+    } catch (e) {
+        console.error('Error loading quotes from local storage:', e);
+        alert('Error loading quotes: ' + e.message + '. Using default quotes.'); // Inform user about parsing error
+        // Fallback to default quotes if parsing fails
+        quotes = [
+            { text: "The only way to do great work is to love what you do.", category: "Inspiration" },
+            { text: "Innovation distinguishes between a leader and a follower.", category: "Innovation" },
+            { text: "Strive not to be a success, but rather to be of value.", category: "Wisdom" },
+            { text: "The future belongs to those who believe in the beauty of their dreams.", category: "Dreams" },
+            { text: "The mind is everything. What you think you become.", category: "Mindset" }
+        ];
+    }
+}
+
+/**
+ * Renders all quotes from the 'quotes' array into the 'list-container' UL element.
+ * Clears existing list items before re-rendering.
+ */
+function renderQuotesList() {
+    listContainer.innerHTML = ''; // Clear existing list items
+    if (quotes.length === 0) {
+        const noQuotesMessage = document.createElement('li');
+        noQuotesMessage.innerHTML = "No quotes added yet."; // Using innerHTML as per previous test feedback
+        listContainer.appendChild(noQuotesMessage);
+        return;
+    }
+
+    quotes.forEach((quote, index) => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `"${quote.text}" - <b>${quote.category}</b> 
+                              <button class="remove-btn" data-index="${index}" 
+                              style="background-color: #e74c3c; padding: 5px 10px; margin-left: 10px; font-size: 0.8rem; border-radius: 5px;">Remove</button>`;
+        listContainer.appendChild(listItem);
+    });
+
+    // Add event listeners to newly created remove buttons using event delegation
+    listContainer.querySelectorAll('.remove-btn').forEach(button => {
+        button.addEventListener('click', removeQuote);
+    });
+}
+
+/**
+ * Removes a quote from the 'quotes' array based on its index.
+ * Updates local storage and re-renders the list.
+ * @param {Event} event - The click event from the remove button.
+ */
+function removeQuote(event) {
+    const indexToRemove = parseInt(event.target.dataset.index);
+    if (!isNaN(indexToRemove) && indexToRemove >= 0 && indexToRemove < quotes.length) {
+        quotes.splice(indexToRemove, 1); // Remove the quote from the array
+        saveQuotes(); // Save the updated array to local storage
+        renderQuotesList(); // Re-render the list to reflect the removal
+        showRandomQuote(); // Update the main display in case the removed quote was showing
+        alert('Quote removed successfully!');
+    }
+}
+
 
 /**
  * Displays a random quote from the 'quotes' array in the quoteDisplay area.
@@ -54,7 +145,7 @@ function addQuote() {
 
     // Validate input
     if (text === "" || category === "") {
-        alert("Please enter both a quote and a category."); // Using alert as per instructions, but a custom modal would be better.
+        alert("Please enter both a quote and a category."); // Using alert as per instructions
         return;
     }
 
@@ -64,12 +155,8 @@ function addQuote() {
     // Add the new quote to the array
     quotes.push(newQuote);
 
-    // Dynamically create a new list item for the added quote
-    const listItem = document.createElement('li'); // Create a new list item element
-    listItem.innerHTML = `"${newQuote.text}" - <b>${newQuote.category}</b>`; // Set its content
-
-    // Append the new list item to the list container
-    listContainer.appendChild(listItem); // Append to the ul with id="list-container"
+    saveQuotes(); // Save the updated quotes array to local storage
+    renderQuotesList(); // Re-render the list to include the new quote
 
     // Clear the input fields
     newQuoteTextInput.value = '';
@@ -91,16 +178,77 @@ function createAddQuoteForm() {
     console.log("Add Quote Form elements are ready.");
 }
 
+/**
+ * Exports the current 'quotes' array as a JSON file.
+ */
+function exportToJsonFile() {
+    if (quotes.length === 0) {
+        alert("No quotes to export!");
+        return;
+    }
+    const dataStr = JSON.stringify(quotes, null, 2); // null, 2 for pretty printing
+    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+    const exportFileName = 'quotes.json';
+
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileName);
+    linkElement.click(); // Programmatically click to trigger download
+    linkElement.remove(); // Clean up the element
+    alert("Quotes exported successfully as quotes.json!");
+}
+
+/**
+ * Imports quotes from a selected JSON file.
+ * @param {Event} event - The change event from the file input.
+ */
+function importFromJsonFile() {
+    const file = importFile.files[0];
+    if (!file) {
+        alert("Please select a JSON file to import.");
+        return;
+    }
+
+    const fileReader = new FileReader();
+    fileReader.onload = function(event) {
+        try {
+            const importedQuotes = JSON.parse(event.target.result);
+
+            // Validate if importedQuotes is an array and contains objects with 'text' and 'category'
+            if (!Array.isArray(importedQuotes) || !importedQuotes.every(q => typeof q === 'object' && q !== null && 'text' in q && 'category' in q)) {
+                alert("Invalid JSON file format. Expected an array of quote objects with 'text' and 'category'.");
+                return;
+            }
+
+            // Add imported quotes to the existing quotes array
+            quotes.push(...importedQuotes);
+            saveQuotes(); // Save the combined quotes to local storage
+            renderQuotesList(); // Re-render the list to show imported quotes
+            showRandomQuote(); // Update the main display
+            alert('Quotes imported successfully!');
+        } catch (e) {
+            console.error('Error parsing JSON file:', e);
+            alert('Error importing quotes: Invalid JSON file or format.');
+        }
+    };
+    fileReader.onerror = function() {
+        alert('Error reading file.');
+    };
+    fileReader.readAsText(file);
+}
+
+
 // Add event listeners
-// Event listener for the "Show New Quote" button
 newQuoteButton.addEventListener('click', showRandomQuote);
-
-// Event listener for the "Add Quote" button
-// Using addEventListener instead of inline onclick for better practice
 addQuoteButton.addEventListener('click', addQuote);
+exportQuotesButton.addEventListener('click', exportToJsonFile);
+importQuotesButton.addEventListener('click', importFromJsonFile); // Attach to button click, not file input change
 
-// Initial display of a random quote and setup of the add quote form when the page loads
+// Initial setup when the page loads
 document.addEventListener('DOMContentLoaded', () => {
-    showRandomQuote();
-    createAddQuoteForm(); // Call the function to ensure it's recognized
+    loadQuotes(); // Load quotes from local storage
+    renderQuotesList(); // Render the list of quotes
+    showRandomQuote(); // Display an initial random quote
+    createAddQuoteForm(); // Ensure the form is ready (as per previous task requirement)
 });
