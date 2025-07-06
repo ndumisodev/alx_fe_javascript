@@ -185,7 +185,7 @@ function removeQuote(event) {
         renderQuotesList(); // Re-render the list to reflect the removal
         showRandomQuote(); // Update the main display in case the removed quote was showing
         displayMessage('Quote removed successfully!', 'success');
-        syncData(); // Trigger sync after local modification
+        syncQuotes(); // Trigger sync after local modification
     }
 }
 
@@ -250,7 +250,7 @@ function addQuote() {
 
     displayMessage("Quote added successfully!", 'success');
     showRandomQuote(); // Show a new random quote, which might be the one just added
-    syncData(); // Trigger sync after local modification
+    syncQuotes(); // Trigger sync after local modification
 }
 
 /**
@@ -316,7 +316,7 @@ function importFromJsonFile() {
             renderQuotesList(); // Re-render the list to show imported quotes
             showRandomQuote(); // Update the main display
             displayMessage('Quotes imported successfully!', 'success');
-            syncData(); // Trigger sync after local modification
+            syncQuotes(); // Trigger sync after local modification
         } catch (e) {
             console.error('Error parsing JSON file:', e);
             displayMessage('Error importing quotes: Invalid JSON file or format.', 'error');
@@ -400,7 +400,7 @@ async function postQuotesToServer(data) {
  * Syncs local quotes with server quotes, resolving conflicts (server data takes precedence).
  * Then, it pushes local changes back to the server.
  */
-async function syncData() {
+async function syncQuotes() { // Renamed from syncData to syncQuotes
     console.log("Initiating data sync...");
     displayMessage("Syncing data...", 'info');
 
@@ -474,7 +474,7 @@ addQuoteButton.addEventListener('click', addQuote);
 exportQuotesButton.addEventListener('click', exportToJsonFile);
 importQuotesButton.addEventListener('click', importFromJsonFile);
 categoryFilter.addEventListener('change', filterQuotes);
-syncNowButton.addEventListener('click', syncData); // New: Manual sync trigger
+syncNowButton.addEventListener('click', syncQuotes); // Updated to syncQuotes
 
 // Initial setup when the page loads
 document.addEventListener('DOMContentLoaded', () => {
@@ -485,7 +485,7 @@ document.addEventListener('DOMContentLoaded', () => {
     createAddQuoteForm(); // Ensure the form is ready
 
     // Set up periodic sync (e.g., every 30 seconds)
-    setInterval(syncData, 30000); // Sync every 30 seconds
+    setInterval(syncQuotes, 30000); // Updated to syncQuotes
     console.log("Automatic sync initiated (every 30 seconds).");
     displayMessage("Application loaded. Automatic sync active.", 'info');
 });
