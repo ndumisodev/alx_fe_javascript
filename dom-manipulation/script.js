@@ -376,7 +376,7 @@ async function postQuotesToServer(data) {
                     userId: 1, // Mock userId
                 }),
                 headers: {
-                    'Content-type': 'application/json; charset=UTF-8',
+                    'Content-Type': 'application/json; charset=UTF-8', // Changed to Content-Type with capital 'T'
                 },
             });
             if (!response.ok) {
