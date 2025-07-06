@@ -2,14 +2,7 @@
 let quotes = [];
 let currentFilter = 'all'; // Stores the currently selected filter category
 
-// Simulate a server-side data store
-// In a real application, this would be fetched from a backend API
-let mockServerQuotes = [
-    { text: "The unexamined life is not worth living.", category: "Philosophy" },
-    { text: "Knowledge is power.", category: "Education" },
-    { text: "The only true wisdom is in knowing you know nothing.", category: "Philosophy" },
-    { text: "Life is what happens when you're busy making other plans.", category: "Life" }
-];
+// Removed mockServerQuotes array as we will now fetch from JSONPlaceholder
 
 // Get references to DOM elements
 const quoteDisplay = document.getElementById('quoteDisplay');
@@ -336,32 +329,71 @@ function importFromJsonFile() {
 }
 
 /**
- * Simulates fetching quotes from a server.
- * In a real application, this would be an actual fetch() call to a backend API.
+ * Simulates fetching quotes from a server using JSONPlaceholder.
  * @returns {Promise<Array<Object>>} A promise that resolves with the server's quotes.
  */
 async function fetchQuotesFromServer() {
     displayMessage("Fetching data from server...", 'info');
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // Return a deep copy to prevent direct modification of mockServerQuotes
-    return JSON.parse(JSON.stringify(mockServerQuotes));
+    try {
+        const response = await fetch('https://jsonplaceholder.typicode.com/posts');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        // Map JSONPlaceholder data to our quote format: title -> text, userId -> category
+        // Using userId as category for demonstration, as 'body' can be very long.
+        const serverQuotes = data.map(post => ({
+            text: post.title,
+            category: `User ${post.userId}` // Using userId as a mock category
+        }));
+        return serverQuotes;
+    } catch (error) {
+        console.error('Error fetching quotes from server:', error);
+        throw new Error('Failed to fetch quotes from server.');
+    }
 }
 
 /**
  * Simulates posting local quotes to a server.
- * In a real application, this would be an actual fetch() POST call.
+ * For JSONPlaceholder, POSTing to /posts will create a new resource, but it won't
+ * actually persist on the server for subsequent GET requests. This is just for demonstration.
  * @param {Array<Object>} data - The quotes data to send to the server.
  */
 async function postQuotesToServer(data) {
     displayMessage("Syncing data to server...", 'info');
-    // Simulate network delay
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    // In this simulation, we're just updating the mock server data
-    // In a real app, you'd send only the changes or the full set and get a response
-    mockServerQuotes = JSON.parse(JSON.stringify(data)); // Deep copy
-    console.log("Server updated with local data:", mockServerQuotes);
-    displayMessage("Data synced to server successfully!", 'success');
+    try {
+        // In a real application, you would send specific changes or the full state
+        // to your actual backend API. JSONPlaceholder is a mock API and doesn't persist data.
+        // We'll just simulate a successful post.
+        // For demonstration, we can simulate sending one of our local quotes back.
+        if (data.length > 0) {
+            const quoteToPost = data[data.length - 1]; // Just post the last added quote as an example
+            const response = await fetch('https://jsonplaceholder.typicode.com/posts', {
+                method: 'POST',
+                body: JSON.stringify({
+                    title: quoteToPost.text,
+                    body: quoteToPost.category, // Using category as body for mock
+                    userId: 1, // Mock userId
+                }),
+                headers: {
+                    'Content-type': 'application/json; charset=UTF-8',
+                },
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const result = await response.json();
+            console.log("Simulated server post response:", result);
+            displayMessage("Data synced to server successfully!", 'success');
+        } else {
+            console.log("No local data to post to server.");
+            displayMessage("No local data to sync to server.", 'info');
+        }
+
+    } catch (error) {
+        console.error('Error during simulated post to server:', error);
+        displayMessage('Failed to sync data to server: ' + error.message, 'error');
+    }
 }
 
 /**
@@ -401,11 +433,11 @@ async function syncData() {
             }
         });
 
-        // Check for new quotes from server that weren't in local before merge
-        // This is implicitly handled by adding all server quotes first.
-        // We can count how many server quotes were truly "new" to the local set.
-        newQuotesFromServer = serverQuotes.length - quotes.filter(lQuote => serverQuoteMap.has(`${lQuote.text}|${lQuote.category}`)).length;
-
+        // Calculate new quotes from server that were not present locally before merge
+        // This is done by filtering serverQuotes for those not found in the original local 'quotes' array
+        newQuotesFromServer = serverQuotes.filter(sQuote =>
+            !quotes.some(lQuote => lQuote.text === sQuote.text && lQuote.category === sQuote.category)
+        ).length;
 
         // Update local quotes array
         quotes = mergedQuotes;
