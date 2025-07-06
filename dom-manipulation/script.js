@@ -15,6 +15,7 @@ const newQuoteButton = document.getElementById('newQuote');
 const newQuoteTextInput = document.getElementById('newQuoteText');
 const newQuoteCategoryInput = document.getElementById('newQuoteCategory');
 const addQuoteButton = document.getElementById('addQuoteButton');
+const listContainer = document.getElementById('list-container'); // Get reference to the list container
 
 /**
  * Displays a random quote from the 'quotes' array in the quoteDisplay area.
@@ -23,8 +24,8 @@ const addQuoteButton = document.getElementById('addQuoteButton');
 function showRandomQuote() {
     // Check if there are any quotes to display
     if (quotes.length === 0) {
-        quoteText.innerHTML = "No quotes available."; // Changed to innerHTML
-        quoteCategory.innerHTML = ""; // Changed to innerHTML
+        quoteText.innerHTML = "No quotes available.";
+        quoteCategory.innerHTML = "";
         return;
     }
 
@@ -33,8 +34,8 @@ function showRandomQuote() {
     const randomQuote = quotes[randomIndex];
 
     // Update the DOM with the random quote
-    quoteText.innerHTML = `"${randomQuote.text}"`; // Changed to innerHTML
-    quoteCategory.innerHTML = `- ${randomQuote.category}`; // Changed to innerHTML
+    quoteText.innerHTML = `"${randomQuote.text}"`;
+    quoteCategory.innerHTML = `- ${randomQuote.category}`;
 
     // Optional: Add a fade-in animation class for visual effect
     quoteDisplay.style.animation = 'none'; // Reset animation
@@ -45,6 +46,7 @@ function showRandomQuote() {
 /**
  * Adds a new quote to the 'quotes' array based on user input from the form.
  * Clears the input fields after adding the quote.
+ * It also dynamically updates the 'Added List' section in the DOM.
  */
 function addQuote() {
     const text = newQuoteTextInput.value.trim();
@@ -61,6 +63,13 @@ function addQuote() {
 
     // Add the new quote to the array
     quotes.push(newQuote);
+
+    // Dynamically create a new list item for the added quote
+    const listItem = document.createElement('li'); // Create a new list item element
+    listItem.innerHTML = `"${newQuote.text}" - <b>${newQuote.category}</b>`; // Set its content
+
+    // Append the new list item to the list container
+    listContainer.appendChild(listItem); // Append to the ul with id="list-container"
 
     // Clear the input fields
     newQuoteTextInput.value = '';
