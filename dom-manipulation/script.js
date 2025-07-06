@@ -187,7 +187,10 @@ function exportToJsonFile() {
         return;
     }
     const dataStr = JSON.stringify(quotes, null, 2); // null, 2 for pretty printing
-    const dataUri = 'data:application/json;charset=utf-8,' + encodeURIComponent(dataStr);
+
+    // Create a Blob from the JSON string
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const dataUri = URL.createObjectURL(blob); // Create a URL for the Blob
 
     const exportFileName = 'quotes.json';
 
@@ -197,6 +200,8 @@ function exportToJsonFile() {
     linkElement.click(); // Programmatically click to trigger download
     linkElement.remove(); // Clean up the element
     alert("Quotes exported successfully as quotes.json!");
+    // Revoke the object URL to free up memory
+    URL.revokeObjectURL(dataUri);
 }
 
 /**
