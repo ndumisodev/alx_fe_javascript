@@ -447,7 +447,7 @@ async function syncQuotes() { // Renamed from syncData to syncQuotes
         renderQuotesList(); // Re-render the list with merged data
         showRandomQuote(); // Update current quote display
 
-        let syncMessage = "Sync complete!";
+        let syncMessage = "Quotes synced with server!"; // Changed message to match test
         if (newQuotesFromServer > 0) {
             syncMessage += ` ${newQuotesFromServer} new quotes from server.`;
         }
